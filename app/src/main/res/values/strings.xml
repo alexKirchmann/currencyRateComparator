@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Курсы валют</string>
+    <string name="bank_name_1">ПриватБанк</string>
+    <string name="bank_name_2">НБУ</string>
+    <string name="calendar_text_1">01.01.2021</string>
+    <string name="calendar_text_2">01.01.2021</string>
+    <string name="table_1_row_1_text_1">Валюта</string>
+    <string name="table_1_row_1_text_2">Покупка</string>
+    <string name="table_1_row_1_text_3">Продажа</string>
+    <string name="table_1_row_2_text_1">EUR</string>
+    <string name="table_1_row_3_text_1">USD</string>
+    <string name="table_1_row_4_text_1">RUR</string>
+    <string name="table_1_row_2_text_2">28.300</string>
+    <string name="table_1_row_2_text_3">28.300</string>
+    <string name="table_1_row_3_text_2">28.300</string>
+    <string name="table_1_row_3_text_3">28.300</string>
+    <string name="table_1_row_4_text_2">28.300</string>
+    <string name="table_1_row_4_text_3">28.300</string>
+    <string name="table_2_row_1_text_1">Доллар США</string>
+    <string name="table_2_row_2_text_1">Российский Рубль</string>
+    <string name="table_2_row_3_text_1">Доллар США</string>
+    <string name="table_2_row_4_text_1">Российский Рубль</string>
+    <string name="table_2_row_5_text_1">Доллар США</string>
+    <string name="table_2_row_6_text_1">Российский Рубль</string>
+    <string name="table_2_row_1_text_2">26.31UAH</string>
+    <string name="table_2_row_2_text_2">26.31UAH</string>
+    <string name="table_2_row_3_text_2">26.31UAH</string>
+    <string name="table_2_row_4_text_2">26.31UAH</string>
+    <string name="table_2_row_5_text_2">26.31UAH</string>
+    <string name="table_2_row_6_text_2">26.31UAH</string>
+    <string name="table_2_row_1_text_3">1USD</string>
+    <string name="table_2_row_2_text_3">100RUR</string>
+    <string name="table_2_row_3_text_3">1USD</string>
+    <string name="table_2_row_4_text_3">100RUR</string>
+    <string name="table_2_row_5_text_3">1USD</string>
+    <string name="table_2_row_6_text_3">100RUR</string>
+</resources>
