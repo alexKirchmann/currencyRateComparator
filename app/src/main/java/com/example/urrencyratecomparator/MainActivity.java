@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +35,7 @@ import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity {
     private URL pbRateURL;
-    private URL nbuRatURL;
+    private URL nbuRateURL;
 
     private static final String TAG = "MainActivity";
     private DatePickerDialog.OnDateSetListener dateSetListener;
@@ -46,15 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tv_calendar_1;
     private TextView tv_calendar_2;
     private ArrayList<TableRow> table1RowList = new ArrayList<>();
-    private TableRow table_1_row_1;
-    private TableRow table_1_row_2;
-    private TableRow table_1_row_3;
-    private TableRow table_2_row_1;
-    private TableRow table_2_row_2;
-    private TableRow table_2_row_3;
-    private TableRow table_2_row_4;
-    private TableRow table_2_row_5;
-    private TableRow table_2_row_6;
+    private ArrayList<TableRow> table2RowList = new ArrayList<>();
     private ScrollView scrollView_table_2;
 
     @Override
@@ -66,15 +57,6 @@ public class MainActivity extends AppCompatActivity {
 
         tv_calendar_1 = findViewById(R.id.tv_calendar_1);
         tv_calendar_2 = findViewById(R.id.tv_calendar_2);
-        table_1_row_1 = findViewById(R.id.table_1_row_1);
-        table_1_row_2 = findViewById(R.id.table_1_row_2);
-        table_1_row_3 = findViewById(R.id.table_1_row_3);
-        table_2_row_1 = findViewById(R.id.table_2_row_1);
-        table_2_row_2 = findViewById(R.id.table_2_row_2);
-        table_2_row_3 = findViewById(R.id.table_2_row_3);
-        table_2_row_4 = findViewById(R.id.table_2_row_4);
-        table_2_row_5 = findViewById(R.id.table_2_row_5);
-        table_2_row_6 = findViewById(R.id.table_2_row_6);
         TableLayout tableLayout = findViewById(R.id.table_1);
         scrollView_table_2 = findViewById(R.id.scrollView_table_2);
 
@@ -86,11 +68,11 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             pbRateURL = new URL("https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5");
-            nbuRatURL = new URL("https://bank.gov.ua/NBU_Exchange/exchange?json");
+            nbuRateURL = new URL("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchangenew?json");
         } catch (MalformedURLException e) {e.printStackTrace();}
 
         new GetPBResponseTask().execute(pbRateURL);
-        //new GetNBUResponseTask().execute(nbuRatURL);
+        new GetNBUResponseTask().execute(nbuRateURL);
     }
 
 
@@ -148,19 +130,16 @@ public class MainActivity extends AppCompatActivity {
     public void onCurrency1Click(View tableView) {
         resetRowColors();
         tableView.setBackgroundColor(Color.argb(25, 25, 25, 25));
-        View scrollToView;
-        switch (tableView.getId()) {
-            case R.id.table_1_row_1 :
-                scrollToView = findViewById(R.id.table_2_row_1);
-                break;
-            case R.id.table_1_row_2 :
-                scrollToView = findViewById(R.id.table_2_row_2);
-                break;
-            case R.id.table_1_row_3 :
-                scrollToView = findViewById(R.id.table_2_row_6);
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + tableView.getId());
+        View scrollToView = null;
+
+        for (int i = 0; i < table2RowList.size(); i++) {
+            String tableViewCurrency = ((TextView) tableView.findViewById(R.id.table_1_currency)).getText().toString();
+            if (tableViewCurrency.equals("RUR"))
+                tableViewCurrency = "RUB";
+            String table2RowCurrency = ((TextView) table2RowList.get(i).findViewById(R.id.table_2_units)).getText().toString();
+            if (tableViewCurrency.equals(table2RowCurrency.substring(table2RowCurrency.length()-3))) {
+                scrollToView = table2RowList.get(i);
+            }
         }
 
         scrollView_table_2.smoothScrollTo(0, scrollToView.getTop());
@@ -168,29 +147,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void resetRowColors() {
-        table_1_row_1.setBackgroundColor(Color.WHITE);
-        table_1_row_2.setBackgroundColor(Color.WHITE);
-        table_1_row_3.setBackgroundColor(Color.WHITE);
-        table_2_row_1.setBackgroundColor(Color.WHITE);
-        table_2_row_2.setBackgroundResource(R.color.greenLight);
-        table_2_row_3.setBackgroundColor(Color.WHITE);
-        table_2_row_4.setBackgroundResource(R.color.greenLight);
-        table_2_row_5.setBackgroundColor(Color.WHITE);
-        table_2_row_6.setBackgroundResource(R.color.greenLight);
+        for (int i = 0; i < table1RowList.size(); i++){
+            table1RowList.get(i).setBackgroundColor(Color.WHITE);
+        }
+
+        for (int i = 0; i < table2RowList.size(); i++) {
+            if (i % 2 == 0) {
+                table2RowList.get(0).setBackgroundColor(Color.WHITE);
+            } else {
+                table2RowList.get(0).setBackgroundResource(R.color.greenLight);
+            }
+        }
     }
 
 
 
     class GetPBResponseTask extends AsyncTask<URL, Void, String> {
-
         @Override
         protected String doInBackground(URL... urls) {
             String response = null;
             try {
                 response = getResponseFromURL(urls[0]);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (IOException e) { e.printStackTrace(); }
             return response;
         }
 
@@ -200,41 +178,31 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray jsonResponse = new JSONArray(response);
                 TableLayout table = MainActivity.this.findViewById(R.id.table_1);
 
-                for (int i = 0; i < jsonResponse.length(); i++) {
-                    TableRow tableRow = (TableRow) LayoutInflater.from(MainActivity.this).inflate(R.layout.row_template, null);
-                    if (tableRow == null) {
-                        System.out.println("NULL!");
-                    }
-                    ((TextView) tableRow.findViewById(R.id.table_1_currency)).setText(jsonResponse.getJSONObject(i).getString("ccy"));
-                    ((TextView) tableRow.findViewById(R.id.table_1_buy)).setText(jsonResponse.getJSONObject(i).getString("buy"));
-                    ((TextView) tableRow.findViewById(R.id.table_1_sale)).setText(jsonResponse.getJSONObject(i).getString("sale"));
-                    table.addView(tableRow);
+                for (int i = 0; i < 3; i++) {
+                    String buy = cutTo3AfterPoint(jsonResponse.getJSONObject(i).getString("buy"));
+                    String sale = cutTo3AfterPoint(jsonResponse.getJSONObject(i).getString("sale"));
+
+
+                    TableRow row = (TableRow) LayoutInflater.from(MainActivity.this).inflate(R.layout.table_1_row_template, null);
+                    ((TextView) row.findViewById(R.id.table_1_currency)).setText(jsonResponse.getJSONObject(i).getString("ccy"));
+                    ((TextView) row.findViewById(R.id.table_1_buy)).setText(buy);
+                    ((TextView) row.findViewById(R.id.table_1_sale)).setText(sale);
+                    int id = View.generateViewId();
+                    row.setId(id);
+                    table.addView(row);
+                    table1RowList.add((TableRow) table.findViewById(id));
                 }
-
-                JSONObject row1 = jsonResponse.getJSONObject(0);
-                JSONObject row2 = jsonResponse.getJSONObject(1);
-                JSONObject row3 = jsonResponse.getJSONObject(2);
-
-                TextView table_1_row_1_text_1 = findViewById(R.id.table_1_row_1_text_1);
-                TextView table_1_row_1_text_2 = findViewById(R.id.table_1_row_1_text_2);
-                TextView table_1_row_1_text_3 = findViewById(R.id.table_1_row_1_text_3);
-                table_1_row_1_text_1.setText(row1.getString("ccy"));
-                table_1_row_1_text_2.setText(row1.getString("buy").substring(0, 6));
-                table_1_row_1_text_3.setText(row1.getString("sale").substring(0, 6));
             } catch (JSONException e) {e.printStackTrace();}
         }
     }
 
     class GetNBUResponseTask extends AsyncTask<URL, Void, String> {
-
         @Override
         protected String doInBackground(URL... urls) {
             String response = null;
             try {
                 response = getResponseFromURL(urls[0]);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (IOException e) { e.printStackTrace(); }
             return response;
         }
 
@@ -242,17 +210,31 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String response) {
             try {
                 JSONArray jsonResponse = new JSONArray(response);
-                JSONObject row1 = jsonResponse.getJSONObject(0);
-                JSONObject row2 = jsonResponse.getJSONObject(1);
-                JSONObject row3 = jsonResponse.getJSONObject(2);
+                TableLayout table = MainActivity.this.findViewById(R.id.table_2);
 
-                TextView table_1_row_1_text_1 = findViewById(R.id.table_1_row_1_text_1);
-                TextView table_1_row_1_text_2 = findViewById(R.id.table_1_row_1_text_2);
-                TextView table_1_row_1_text_3 = findViewById(R.id.table_1_row_1_text_3);
-                table_1_row_1_text_1.setText(row1.getString("ccy"));
-                table_1_row_1_text_2.setText(row1.getString("buy").substring(0, 6));
-                table_1_row_1_text_3.setText(row1.getString("sale").substring(0, 6));
-            } catch (JSONException e) {e.printStackTrace();}
+                for (int i = 0; i < jsonResponse.length(); i++) {
+                    TableRow row = (TableRow) LayoutInflater.from(MainActivity.this).inflate(R.layout.table_2_row_template, null);
+                    double rateVal = jsonResponse.getJSONObject(i).getDouble("rate");
+                    short units = 1;
+
+                    while (rateVal < 1) {
+                        rateVal *= 10;
+                        units *= 10;
+                    }
+
+                    String rate = rateVal + "";
+                    rate = cutTo3AfterPoint(rate);
+                    String cc = units + " " + jsonResponse.getJSONObject(i).getString("cc");
+
+                    ((TextView) row.findViewById(R.id.table_2_currency)).setText(jsonResponse.getJSONObject(i).getString("txt"));
+                    ((TextView) row.findViewById(R.id.table_2_amount)).setText(rate);
+                    ((TextView) row.findViewById(R.id.table_2_units)).setText(cc);
+                    int id = View.generateViewId();
+                    row.setId(id);
+                    table.addView(row);
+                    table2RowList.add((TableRow) table.findViewById(id));
+                }
+            } catch (JSONException e) { e.printStackTrace(); }
         }
     }
 
@@ -271,5 +253,12 @@ public class MainActivity extends AppCompatActivity {
         } finally {
             urlConnection.disconnect();
         }
+    }
+
+    private String cutTo3AfterPoint(String string) {
+        String[] stringArr = string.split("\\p{Punct}");
+        if (stringArr.length > 1 && stringArr[1].length() > 3) {
+            return stringArr[0] + "." + stringArr[1].substring(0, 3);
+        } else return string;
     }
 }

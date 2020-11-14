@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableRow  xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/row_template"
-    android:gravity="center">
+    android:id="@+id/table_1_row_template"
+    android:gravity="center"
+    android:onClick="onCurrency1Click">
 
     <TextView
         android:id="@+id/table_1_currency"
