@@ -47,15 +47,16 @@
     </LinearLayout>
 
     <TableLayout
-        android:id="@+id/layout_table_1"
+        android:id="@+id/table_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">
 
         <TableRow
+            android:id="@+id/table_1_row_0"
             android:gravity="center">
             <TextView
-                android:id="@+id/table_1_row_1_text_1"
+                android:id="@+id/table_1_row_0_text_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -67,7 +68,7 @@
                 android:textAlignment="viewStart"/>
 
             <TextView
-                android:id="@+id/table_1_row_1_text_2"
+                android:id="@+id/table_1_row_0_text_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -79,7 +80,7 @@
                 android:textAlignment="center"/>
 
             <TextView
-                android:id="@+id/table_1_row_1_text_3"
+                android:id="@+id/table_1_row_0_text_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -92,9 +93,12 @@
         </TableRow>
 
         <TableRow
-            android:gravity="center">
+            android:id="@+id/table_1_row_1"
+            android:gravity="center"
+            android:onClick="onCurrency1Click">
+
             <TextView
-                android:id="@+id/table_1_row_2_text_1"
+                android:id="@+id/table_1_row_1_text_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -106,7 +110,7 @@
                 android:textAlignment="viewStart"/>
 
             <TextView
-                android:id="@+id/table_1_row_2_text_2"
+                android:id="@+id/table_1_row_1_text_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -118,7 +122,7 @@
                 android:textAlignment="center"/>
 
             <TextView
-                android:id="@+id/table_1_row_2_text_3"
+                android:id="@+id/table_1_row_1_text_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -131,10 +135,12 @@
         </TableRow>
 
         <TableRow
-            android:gravity="center">
+            android:id="@+id/table_1_row_2"
+            android:gravity="center"
+            android:onClick="onCurrency1Click">
 
             <TextView
-                android:id="@+id/table_1_row_3_text_1"
+                android:id="@+id/table_1_row_2_text_1"
                 android:layout_width="115dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -146,7 +152,7 @@
                 android:textSize="28sp" />
 
             <TextView
-                android:id="@+id/table_1_row_3_text_2"
+                android:id="@+id/table_1_row_2_text_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -158,7 +164,7 @@
                 android:textAlignment="center"/>
 
             <TextView
-                android:id="@+id/table_1_row_3_text_3"
+                android:id="@+id/table_1_row_2_text_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -171,9 +177,12 @@
         </TableRow>
 
         <TableRow
-            android:gravity="center">
+            android:gravity="center"
+            android:id="@+id/table_1_row_3"
+            android:onClick="onCurrency1Click">
+
             <TextView
-                android:id="@+id/table_1_row_4_text_1"
+                android:id="@+id/table_1_row_3_text_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -185,7 +194,7 @@
                 android:textAlignment="viewStart"/>
 
             <TextView
-                android:id="@+id/table_1_row_4_text_2"
+                android:id="@+id/table_1_row_3_text_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -197,7 +206,7 @@
                 android:textAlignment="center"/>
 
             <TextView
-                android:id="@+id/table_1_row_4_text_3"
+                android:id="@+id/table_1_row_3_text_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -250,15 +259,18 @@
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/scrollView_table_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     <TableLayout
-        android:id="@+id/layout_table_2"
+        android:id="@+id/table_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">
 
-            <TableRow android:gravity="center">
+            <TableRow
+                android:id="@+id/table_2_row_1"
+                android:gravity="center">
 
                 <TextView
                     android:id="@+id/table_2_row_1_text_1"
@@ -270,7 +282,7 @@
                     android:text="@string/table_2_row_1_text_1"
                     android:textAlignment="viewStart"
                     android:textColor="@color/black"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -303,6 +315,7 @@
             </TableRow>
 
             <TableRow
+                android:id="@+id/table_2_row_2"
                 android:background="@color/greenLight"
                 android:gravity="center">
 
@@ -348,7 +361,9 @@
                 </LinearLayout>
             </TableRow>
 
-            <TableRow android:gravity="center">
+            <TableRow
+                android:id="@+id/table_2_row_3"
+                android:gravity="center">
 
                 <TextView
                     android:id="@+id/table_2_row_3_text_1"
@@ -393,6 +408,7 @@
             </TableRow>
 
             <TableRow
+                android:id="@+id/table_2_row_4"
                 android:background="@color/greenLight"
                 android:gravity="center">
 
@@ -438,7 +454,9 @@
                 </LinearLayout>
             </TableRow>
 
-            <TableRow android:gravity="center">
+            <TableRow
+                android:id="@+id/table_2_row_5"
+                android:gravity="center">
 
                 <TextView
                     android:id="@+id/table_2_row_5_text_1"
@@ -483,6 +501,7 @@
             </TableRow>
 
             <TableRow
+                android:id="@+id/table_2_row_6"
                 android:background="@color/greenLight"
                 android:gravity="center">
 
