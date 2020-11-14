@@ -46,52 +46,60 @@
             android:textColor="@color/yellow"/>
     </LinearLayout>
 
-    <TableLayout
-        android:id="@+id/table_1"
+    <ScrollView
+        android:id="@+id/scrollView_table_1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <TableRow
-            android:id="@+id/table_1_row_0"
+        <TableLayout
+            android:id="@+id/table_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:gravity="center">
-            <TextView
-                android:id="@+id/table_1_row_0_text_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingVertical="5dp"
-                android:paddingHorizontal="20dp"
-                android:text="@string/table_1_row_1_text_1"
-                android:textSize="20sp"
-                android:textColor="@color/gray"
-                android:textAlignment="viewStart"/>
 
-            <TextView
-                android:id="@+id/table_1_row_0_text_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingVertical="5dp"
-                android:paddingHorizontal="20dp"
-                android:text="@string/table_1_row_1_text_2"
-                android:textSize="20sp"
-                android:textColor="@color/gray"
-                android:textAlignment="center"/>
+            <TableRow
+                android:id="@+id/table_1_row_0"
+                android:gravity="center">
 
-            <TextView
-                android:id="@+id/table_1_row_0_text_3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingVertical="5dp"
-                android:paddingHorizontal="20dp"
-                android:text="@string/table_1_row_1_text_3"
-                android:textSize="20sp"
-                android:textColor="@color/gray"
-                android:textAlignment="viewEnd"/>
-        </TableRow>
-    </TableLayout>
+                <TextView
+                    android:id="@+id/table_1_row_0_text_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="5dp"
+                    android:paddingHorizontal="20dp"
+                    android:text="@string/table_1_row_1_text_1"
+                    android:textSize="20sp"
+                    android:textColor="@color/gray"
+                    android:textAlignment="viewStart"/>
+
+                <TextView
+                    android:id="@+id/table_1_row_0_text_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="5dp"
+                    android:paddingHorizontal="20dp"
+                    android:text="@string/table_1_row_1_text_2"
+                    android:textSize="20sp"
+                    android:textColor="@color/gray"
+                    android:textAlignment="center"/>
+
+                <TextView
+                    android:id="@+id/table_1_row_0_text_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="5dp"
+                    android:paddingHorizontal="20dp"
+                    android:text="@string/table_1_row_1_text_3"
+                    android:textSize="20sp"
+                    android:textColor="@color/gray"
+                    android:textAlignment="viewEnd"/>
+            </TableRow>
+        </TableLayout>
+    </ScrollView>
 
     <LinearLayout
         android:id="@+id/layout_line_2"
@@ -135,13 +143,14 @@
     <ScrollView
         android:id="@+id/scrollView_table_2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
     <TableLayout
         android:id="@+id/table_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">
-
 
         </TableLayout>
     </ScrollView>

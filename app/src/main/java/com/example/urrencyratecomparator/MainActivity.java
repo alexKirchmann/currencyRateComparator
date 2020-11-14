@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,13 +38,18 @@ public class MainActivity extends AppCompatActivity {
     private URL pbRateURL;
     private URL nbuRateURL;
 
-    private static final String TAG = "MainActivity";
     private DatePickerDialog.OnDateSetListener dateSetListener;
-    private DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+    private DateFormat dateFormatView = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+    private DateFormat dateFormatPB = new SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH);
+    private DateFormat dateFormatNBU = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
     private final Calendar TODAYS_DATE = Calendar.getInstance();
     private Calendar dateSet;
     private TextView tv_calendar_1;
     private TextView tv_calendar_2;
+    private String chosenDateView;
+    private String chosenDatePB;
+    private String chosenDateNBU;
+
     private ArrayList<TableRow> table1RowList = new ArrayList<>();
     private ArrayList<TableRow> table2RowList = new ArrayList<>();
     private ScrollView scrollView_table_2;
@@ -57,18 +63,20 @@ public class MainActivity extends AppCompatActivity {
 
         tv_calendar_1 = findViewById(R.id.tv_calendar_1);
         tv_calendar_2 = findViewById(R.id.tv_calendar_2);
-        TableLayout tableLayout = findViewById(R.id.table_1);
         scrollView_table_2 = findViewById(R.id.scrollView_table_2);
 
         tv_calendar_1.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
         tv_calendar_2.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
-        String chosenDate = dateFormat.format(TODAYS_DATE.getTime());
-        tv_calendar_1.setText(chosenDate);
-        tv_calendar_2.setText(chosenDate);
+        chosenDateView = dateFormatView.format(TODAYS_DATE.getTime());
+        tv_calendar_1.setText(chosenDateView);
+        tv_calendar_2.setText(chosenDateView);
+        chosenDatePB = dateFormatPB.format(TODAYS_DATE.getTime());
+        chosenDateNBU = dateFormatNBU.format(TODAYS_DATE.getTime());
+        System.out.println(chosenDatePB + "\n" + chosenDateNBU);
 
         try {
-            pbRateURL = new URL("https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5");
-            nbuRateURL = new URL("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchangenew?json");
+            pbRateURL = new URL("https://api.privatbank.ua/p24api/exchange_rates?json&date=" + chosenDatePB);
+            nbuRateURL = new URL("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=" + chosenDateNBU + "&json");
         } catch (MalformedURLException e) {e.printStackTrace();}
 
         new GetPBResponseTask().execute(pbRateURL);
@@ -88,8 +96,17 @@ public class MainActivity extends AppCompatActivity {
                     dateSet.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                     dateSet.set(Calendar.MONTH, ++month);
                     dateSet.set(Calendar.YEAR, year);
-                    String chosenDate = dateFormat.format(dateSet.getTime());
-                    tv_calendar_1.setText(chosenDate);
+
+                    chosenDateView = dateFormatView.format(dateSet.getTime());
+                    chosenDatePB = dateFormatPB.format(TODAYS_DATE.getTime());
+
+                    tv_calendar_1.setText(chosenDateView);
+
+                    try {
+                        pbRateURL = new URL("https://api.privatbank.ua/p24api/exchange_rates?json&date=" + chosenDatePB);
+                    } catch (MalformedURLException e) {e.printStackTrace();}
+                    new GetPBResponseTask().execute(pbRateURL);
+
                     imageView.setBackgroundResource(R.drawable.calendar_icon);
                 }
             };
@@ -101,8 +118,16 @@ public class MainActivity extends AppCompatActivity {
                     dateSet.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                     dateSet.set(Calendar.MONTH, ++month);
                     dateSet.set(Calendar.YEAR, year);
-                    String chosenDate = dateFormat.format(dateSet.getTime());
-                    tv_calendar_2.setText(chosenDate);
+
+                    chosenDateNBU = dateFormatNBU.format(TODAYS_DATE.getTime());
+
+                    tv_calendar_2.setText(chosenDateView);
+
+                    try {
+                        nbuRateURL = new URL("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=" + chosenDateNBU + "&json");
+                    } catch (MalformedURLException e) {e.printStackTrace();}
+                    new GetNBUResponseTask().execute(nbuRateURL);
+
                     imageView.setBackgroundResource(R.drawable.calendar_icon);
                 }
             };
@@ -134,9 +159,9 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i < table2RowList.size(); i++) {
             String tableViewCurrency = ((TextView) tableView.findViewById(R.id.table_1_currency)).getText().toString();
-            if (tableViewCurrency.equals("RUR"))
-                tableViewCurrency = "RUB";
             String table2RowCurrency = ((TextView) table2RowList.get(i).findViewById(R.id.table_2_units)).getText().toString();
+            if (tableViewCurrency.equals("PLZ"))
+                tableViewCurrency = "PLN";
             if (tableViewCurrency.equals(table2RowCurrency.substring(table2RowCurrency.length()-3))) {
                 scrollToView = table2RowList.get(i);
             }
@@ -153,9 +178,9 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i < table2RowList.size(); i++) {
             if (i % 2 == 0) {
-                table2RowList.get(0).setBackgroundColor(Color.WHITE);
+                table2RowList.get(i).setBackgroundColor(Color.WHITE);
             } else {
-                table2RowList.get(0).setBackgroundResource(R.color.greenLight);
+                table2RowList.get(i).setBackgroundResource(R.color.greenLight);
             }
         }
     }
@@ -175,22 +200,27 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String response) {
             try {
-                JSONArray jsonResponse = new JSONArray(response);
+                JSONObject jsonResponse = new JSONObject(response);
+                JSONArray jsonResponseArr = jsonResponse.getJSONArray("exchangeRate");
                 TableLayout table = MainActivity.this.findViewById(R.id.table_1);
+                String buy;
+                String sale;
 
-                for (int i = 0; i < 3; i++) {
-                    String buy = cutTo3AfterPoint(jsonResponse.getJSONObject(i).getString("buy"));
-                    String sale = cutTo3AfterPoint(jsonResponse.getJSONObject(i).getString("sale"));
+                for (int i = 1; i < jsonResponseArr.length(); i++) {
+                    try {
+                        buy = cutTo3AfterPoint(jsonResponseArr.getJSONObject(i).getString("purchaseRate"));
+                        sale = cutTo3AfterPoint(jsonResponseArr.getJSONObject(i).getString("saleRate"));
 
+                        TableRow row = (TableRow) LayoutInflater.from(MainActivity.this).inflate(R.layout.table_1_row_template, null);
+                        ((TextView) row.findViewById(R.id.table_1_currency)).setText(jsonResponseArr.getJSONObject(i).getString("currency"));
+                        ((TextView) row.findViewById(R.id.table_1_buy)).setText(buy);
+                        ((TextView) row.findViewById(R.id.table_1_sale)).setText(sale);
 
-                    TableRow row = (TableRow) LayoutInflater.from(MainActivity.this).inflate(R.layout.table_1_row_template, null);
-                    ((TextView) row.findViewById(R.id.table_1_currency)).setText(jsonResponse.getJSONObject(i).getString("ccy"));
-                    ((TextView) row.findViewById(R.id.table_1_buy)).setText(buy);
-                    ((TextView) row.findViewById(R.id.table_1_sale)).setText(sale);
-                    int id = View.generateViewId();
-                    row.setId(id);
-                    table.addView(row);
-                    table1RowList.add((TableRow) table.findViewById(id));
+                        int id = View.generateViewId();
+                        row.setId(id);
+                        table.addView(row);
+                        table1RowList.add((TableRow) table.findViewById(id));
+                    } catch (Exception e) { }
                 }
             } catch (JSONException e) {e.printStackTrace();}
         }
@@ -209,6 +239,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String response) {
             try {
+                boolean isEven = false;
                 JSONArray jsonResponse = new JSONArray(response);
                 TableLayout table = MainActivity.this.findViewById(R.id.table_2);
 
@@ -229,10 +260,18 @@ public class MainActivity extends AppCompatActivity {
                     ((TextView) row.findViewById(R.id.table_2_currency)).setText(jsonResponse.getJSONObject(i).getString("txt"));
                     ((TextView) row.findViewById(R.id.table_2_amount)).setText(rate);
                     ((TextView) row.findViewById(R.id.table_2_units)).setText(cc);
+
+                    if (!isEven) {
+                            row.setBackgroundColor(Color.WHITE);
+                        } else {
+                            row.setBackgroundResource(R.color.greenLight);
+                        }
+
                     int id = View.generateViewId();
                     row.setId(id);
                     table.addView(row);
                     table2RowList.add((TableRow) table.findViewById(id));
+                    isEven = !isEven;
                 }
             } catch (JSONException e) { e.printStackTrace(); }
         }
@@ -257,8 +296,20 @@ public class MainActivity extends AppCompatActivity {
 
     private String cutTo3AfterPoint(String string) {
         String[] stringArr = string.split("\\p{Punct}");
-        if (stringArr.length > 1 && stringArr[1].length() > 3) {
-            return stringArr[0] + "." + stringArr[1].substring(0, 3);
-        } else return string;
+        if (stringArr.length > 1){
+            StringBuilder afterPoint = new StringBuilder(stringArr[1]);
+
+            if (afterPoint.length() > 3) {
+                return stringArr[0] + "." + afterPoint.substring(0, 3);
+
+            } else if (afterPoint.length() < 3) {
+                while (afterPoint.length() < 3) {
+                    afterPoint.append("0");
+                }
+                return stringArr[0] + "." + afterPoint.toString();
+
+            } else return string;
+
+        } else return string + ".000";
     }
 }
