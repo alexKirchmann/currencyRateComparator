@@ -85,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+
     public void onCalendarClick(View view){
         final ImageView imageView = (ImageView) view;
 
@@ -94,13 +96,16 @@ public class MainActivity extends AppCompatActivity {
                 public void onDateSet(DatePicker viewDP, int year, int month, int dayOfMonth) {
                     dateSet = Calendar.getInstance();
                     dateSet.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    dateSet.set(Calendar.MONTH, ++month);
+                    dateSet.set(Calendar.MONTH, month);
                     dateSet.set(Calendar.YEAR, year);
 
                     chosenDateView = dateFormatView.format(dateSet.getTime());
-                    chosenDatePB = dateFormatPB.format(TODAYS_DATE.getTime());
+                    chosenDatePB = dateFormatPB.format(dateSet.getTime());
 
                     tv_calendar_1.setText(chosenDateView);
+
+                    TableLayout table1 = findViewById(R.id.table_1);
+                    table1.removeViews(1, table1.getChildCount()-1);
 
                     try {
                         pbRateURL = new URL("https://api.privatbank.ua/p24api/exchange_rates?json&date=" + chosenDatePB);
@@ -116,12 +121,16 @@ public class MainActivity extends AppCompatActivity {
                 public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                     dateSet = Calendar.getInstance();
                     dateSet.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    dateSet.set(Calendar.MONTH, ++month);
+                    dateSet.set(Calendar.MONTH, month);
                     dateSet.set(Calendar.YEAR, year);
 
-                    chosenDateNBU = dateFormatNBU.format(TODAYS_DATE.getTime());
+                    chosenDateView = dateFormatView.format(dateSet.getTime());
+                    chosenDateNBU = dateFormatNBU.format(dateSet.getTime());
 
                     tv_calendar_2.setText(chosenDateView);
+
+                    TableLayout table2 = findViewById(R.id.table_2);
+                    table2.removeViews(0, table2.getChildCount());
 
                     try {
                         nbuRateURL = new URL("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=" + chosenDateNBU + "&json");
@@ -149,8 +158,6 @@ public class MainActivity extends AppCompatActivity {
         calendarDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         calendarDialog.show();
     }
-
-
 
     public void onCurrency1Click(View tableView) {
         resetRowColors();
@@ -184,6 +191,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
 
 
 
@@ -276,6 +285,10 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) { e.printStackTrace(); }
         }
     }
+
+
+
+
 
     public String getResponseFromURL(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
