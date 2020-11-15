@@ -14,6 +14,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -59,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<TableRow> table2RowList = new ArrayList<>();
     private ScrollView scrollView_table_2;
 
+    public RelativeLayout mainLayout;
+    public static ProgressBar progressBar1;
+    public static ProgressBar progressBar2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
         chosenDatePB = dateFormatPB.format(TODAYS_DATE.getTime());
         chosenDateNBU = dateFormatNBU.format(TODAYS_DATE.getTime());
         System.out.println(chosenDatePB + "\n" + chosenDateNBU);
+
+        progressBar1 = findViewById(R.id.table_1_progress_bar);
+        progressBar2 = findViewById(R.id.table_2_progress_bar);
 
         try {
             pbRateURL = new URL("https://api.privatbank.ua/p24api/exchange_rates?json&date=" + chosenDatePB);
@@ -215,6 +224,8 @@ public class MainActivity extends AppCompatActivity {
     class GetPBResponseTask extends AsyncTask<URL, Void, String> {
         @Override
         protected String doInBackground(URL... urls) {
+            publishProgress();
+
             String response = null;
             try {
                 response = getResponseFromURL(urls[0]);
@@ -247,13 +258,23 @@ public class MainActivity extends AppCompatActivity {
                         table1RowList.add((TableRow) table.findViewById(id));
                     } catch (Exception e) { }
                 }
+
+                MainActivity.progressBar1.setVisibility(View.INVISIBLE);
             } catch (JSONException e) {e.printStackTrace();}
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+            MainActivity.progressBar1.setVisibility(View.VISIBLE);
         }
     }
 
     class GetNBUResponseTask extends AsyncTask<URL, Void, String> {
         @Override
         protected String doInBackground(URL... urls) {
+            publishProgress();
+
             String response = null;
             try {
                 response = getResponseFromURL(urls[0]);
@@ -298,7 +319,15 @@ public class MainActivity extends AppCompatActivity {
                     table2RowList.add((TableRow) table.findViewById(id));
                     isEven = !isEven;
                 }
-            } catch (JSONException e) { e.printStackTrace(); }
+
+                MainActivity.progressBar2.setVisibility(View.INVISIBLE);
+            } catch (Exception e) { e.printStackTrace(); }
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+            MainActivity.progressBar2.setVisibility(View.VISIBLE);
         }
     }
 
