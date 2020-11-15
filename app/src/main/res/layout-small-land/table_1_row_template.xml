@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/table_1_row_template"
+    android:gravity="center"
+    android:onClick="onCurrency1Click">
+
+    <TextView
+        android:id="@+id/table_1_currency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingVertical="0.5dp"
+        android:paddingHorizontal="2.5dp"
+        android:text="@string/table_1_row_1_text_1"
+        android:textSize="14sp"
+        android:textColor="@color/gray"
+        android:textAlignment="viewStart"/>
+
+    <TextView
+        android:id="@+id/table_1_buy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingVertical="0.5dp"
+        android:paddingHorizontal="2.5dp"
+        android:text="@string/table_1_row_1_text_2"
+        android:textSize="14sp"
+        android:textColor="@color/gray"
+        android:textAlignment="center"/>
+
+    <TextView
+        android:id="@+id/table_1_sale"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingVertical="0.5dp"
+        android:paddingHorizontal="2.5dp"
+        android:text="@string/table_1_row_1_text_3"
+        android:textSize="14sp"
+        android:textColor="@color/gray"
+        android:textAlignment="viewEnd"/>
+</TableRow>
