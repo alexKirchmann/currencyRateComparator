@@ -10,4 +10,7 @@
     <string name="table_2_row_1_text_1">Доллар США</string>
     <string name="table_2_row_1_text_2">26.31UAH</string>
     <string name="table_2_row_1_text_3">1USD</string>
+    <string name="cancel">Cancel</string>
+    <string name="year_before">Банк хранит данные только за последние 4 года</string>
+    <string name="year_after">Банк не хранит данные на будущий курс</string>
 </resources>

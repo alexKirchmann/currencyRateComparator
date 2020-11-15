@@ -4,6 +4,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
@@ -17,6 +18,7 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,7 +40,9 @@ public class MainActivity extends AppCompatActivity {
     private URL pbRateURL;
     private URL nbuRateURL;
 
+    private DatePickerDialog calendarDialog;
     private DatePickerDialog.OnDateSetListener dateSetListener;
+    private boolean calendarDialogIsShown = false;
     private DateFormat dateFormatView = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
     private DateFormat dateFormatPB = new SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH);
     private DateFormat dateFormatNBU = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
@@ -49,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private String chosenDateView;
     private String chosenDatePB;
     private String chosenDateNBU;
+    private Toast wrongYear;
 
     private ArrayList<TableRow> table1RowList = new ArrayList<>();
     private ArrayList<TableRow> table2RowList = new ArrayList<>();
@@ -90,73 +95,84 @@ public class MainActivity extends AppCompatActivity {
     public void onCalendarClick(View view){
         final ImageView imageView = (ImageView) view;
 
-        if (view.getId() == R.id.iv_calendar_icon_1) {
-            dateSetListener = new DatePickerDialog.OnDateSetListener() {
+        if (!calendarDialogIsShown){
+            calendarDialogIsShown = true;
+            if (view.getId() == R.id.iv_calendar_icon_1) {
+                dateSetListener = new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker viewDP, int year, int month, int dayOfMonth) {
+                        if (checkYear(year, month, dayOfMonth)) {
+                            chosenDateView = dateFormatView.format(dateSet.getTime());
+                            chosenDatePB = dateFormatPB.format(dateSet.getTime());
+
+                            tv_calendar_1.setText(chosenDateView);
+
+                            TableLayout table1 = findViewById(R.id.table_1);
+                            table1.removeViews(1, table1.getChildCount()-1);
+
+                            try {
+                                pbRateURL = new URL("https://api.privatbank.ua/p24api/exchange_rates?json&date=" + chosenDatePB);
+                            } catch (MalformedURLException e) {e.printStackTrace();}
+                            new GetPBResponseTask().execute(pbRateURL);
+
+                            imageView.setBackgroundResource(R.drawable.calendar_icon);
+                            calendarDialogIsShown = false;
+                        } else {
+                            showDataRejection();
+                            calendarDialogIsShown = false;
+                        }
+                    }
+                };
+            } else if (view.getId() == R.id.iv_calendar_icon_2) {
+                dateSetListener = new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        if (checkYear(year, month, dayOfMonth)) {
+                            chosenDateView = dateFormatView.format(dateSet.getTime());
+                            chosenDateNBU = dateFormatNBU.format(dateSet.getTime());
+
+                            tv_calendar_2.setText(chosenDateView);
+
+                            TableLayout table2 = findViewById(R.id.table_2);
+                            table2.removeViews(0, table2.getChildCount());
+
+                            try {
+                                nbuRateURL = new URL("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=" + chosenDateNBU + "&json");
+                            } catch (MalformedURLException e) {e.printStackTrace();}
+                            new GetNBUResponseTask().execute(nbuRateURL);
+
+                            imageView.setBackgroundResource(R.drawable.calendar_icon);
+                            calendarDialogIsShown = false;
+                        } else {
+                            showDataRejection();
+                            calendarDialogIsShown = false;
+                        }
+                    }
+                };
+            }
+
+            imageView.setBackgroundResource(R.drawable.calendar_icon_pressed);
+
+            calendarDialog = new DatePickerDialog(
+                    MainActivity.this,
+                    android.R.style.Theme_Holo_Light_NoActionBar,
+                    dateSetListener,
+                    Calendar.getInstance().get(Calendar.YEAR),
+                    Calendar.getInstance().get(Calendar.MONTH),
+                    Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+
+            calendarDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+            calendarDialog.setCancelable(true);
+            calendarDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
                 @Override
-                public void onDateSet(DatePicker viewDP, int year, int month, int dayOfMonth) {
-                    dateSet = Calendar.getInstance();
-                    dateSet.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    dateSet.set(Calendar.MONTH, month);
-                    dateSet.set(Calendar.YEAR, year);
-
-                    chosenDateView = dateFormatView.format(dateSet.getTime());
-                    chosenDatePB = dateFormatPB.format(dateSet.getTime());
-
-                    tv_calendar_1.setText(chosenDateView);
-
-                    TableLayout table1 = findViewById(R.id.table_1);
-                    table1.removeViews(1, table1.getChildCount()-1);
-
-                    try {
-                        pbRateURL = new URL("https://api.privatbank.ua/p24api/exchange_rates?json&date=" + chosenDatePB);
-                    } catch (MalformedURLException e) {e.printStackTrace();}
-                    new GetPBResponseTask().execute(pbRateURL);
-
+                public void onClick(DialogInterface dialog, int which) {
                     imageView.setBackgroundResource(R.drawable.calendar_icon);
+                    calendarDialogIsShown = false;
                 }
-            };
-        } else if (view.getId() == R.id.iv_calendar_icon_2) {
-            dateSetListener = new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                    dateSet = Calendar.getInstance();
-                    dateSet.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    dateSet.set(Calendar.MONTH, month);
-                    dateSet.set(Calendar.YEAR, year);
-
-                    chosenDateView = dateFormatView.format(dateSet.getTime());
-                    chosenDateNBU = dateFormatNBU.format(dateSet.getTime());
-
-                    tv_calendar_2.setText(chosenDateView);
-
-                    TableLayout table2 = findViewById(R.id.table_2);
-                    table2.removeViews(0, table2.getChildCount());
-
-                    try {
-                        nbuRateURL = new URL("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=" + chosenDateNBU + "&json");
-                    } catch (MalformedURLException e) {e.printStackTrace();}
-                    new GetNBUResponseTask().execute(nbuRateURL);
-
-                    imageView.setBackgroundResource(R.drawable.calendar_icon);
-                }
-            };
+            });
+            calendarDialog.show();
         }
-
-        imageView.setBackgroundResource(R.drawable.calendar_icon_pressed);
-
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog calendarDialog = new DatePickerDialog(
-                MainActivity.this,
-                android.R.style.Theme_Holo_Light_NoActionBar,
-                dateSetListener,
-                year, month, day);
-
-        calendarDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        calendarDialog.show();
     }
 
     public void onCurrency1Click(View tableView) {
@@ -324,5 +340,25 @@ public class MainActivity extends AppCompatActivity {
             } else return string;
 
         } else return string + ".000";
+    }
+
+    public boolean checkYear (int year, int month, int day) {
+        dateSet = Calendar.getInstance();
+        Calendar minDate = Calendar.getInstance();
+        Calendar maxDate = Calendar.getInstance();
+        dateSet.set(year, month, day);
+        minDate.set(Calendar.getInstance().get(Calendar.YEAR) - 4, Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH) - 1);
+        maxDate.set(Calendar.DAY_OF_MONTH, Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + 1);
+
+        return dateSet.after(minDate) && dateSet.before(maxDate);
+    }
+
+    private void showDataRejection() {
+        if (dateSet.before(Calendar.getInstance())) {
+            wrongYear = Toast.makeText(MainActivity.this, R.string.year_before, Toast.LENGTH_LONG);
+        } else {
+            wrongYear = Toast.makeText(MainActivity.this, R.string.year_after, Toast.LENGTH_LONG);
+        }
+        wrongYear.show();
     }
 }
