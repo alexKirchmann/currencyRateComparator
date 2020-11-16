@@ -57,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
     private String chosenDateNBU;
     private Toast wrongYear;
 
-    private ArrayList<TableRow> table1RowList = new ArrayList<>();
-    private ArrayList<TableRow> table2RowList = new ArrayList<>();
+    public ArrayList<TableRow> table1RowList = new ArrayList<>();
+    public ArrayList<TableRow> table2RowList = new ArrayList<>();
     private ScrollView scrollView_table_2;
 
     public RelativeLayout mainLayout;
@@ -93,8 +93,8 @@ public class MainActivity extends AppCompatActivity {
             nbuRateURL = new URL("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=" + chosenDateNBU + "&json");
         } catch (MalformedURLException e) {e.printStackTrace();}
 
-        new GetPBResponseTask().execute(pbRateURL);
-        new GetNBUResponseTask().execute(nbuRateURL);
+        new GetPBResponseTask(this).execute(pbRateURL);
+        new GetNBUResponseTask(this).execute(nbuRateURL);
     }
 
 
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 pbRateURL = new URL("https://api.privatbank.ua/p24api/exchange_rates?json&date=" + chosenDatePB);
                             } catch (MalformedURLException e) {e.printStackTrace();}
-                            new GetPBResponseTask().execute(pbRateURL);
+                            new GetPBResponseTask(MainActivity.this).execute(pbRateURL);
 
                             imageView.setBackgroundResource(R.drawable.calendar_icon);
                             calendarDialogIsShown = false;
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 nbuRateURL = new URL("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=" + chosenDateNBU + "&json");
                             } catch (MalformedURLException e) {e.printStackTrace();}
-                            new GetNBUResponseTask().execute(nbuRateURL);
+                            new GetNBUResponseTask(MainActivity.this).execute(nbuRateURL);
 
                             imageView.setBackgroundResource(R.drawable.calendar_icon);
                             calendarDialogIsShown = false;
@@ -215,160 +215,6 @@ public class MainActivity extends AppCompatActivity {
                 table2RowList.get(i).setBackgroundResource(R.color.greenLight);
             }
         }
-    }
-
-
-
-
-
-    class GetPBResponseTask extends AsyncTask<URL, Void, String> {
-        @Override
-        protected String doInBackground(URL... urls) {
-            publishProgress();
-
-            String response = null;
-            try {
-                response = getResponseFromURL(urls[0]);
-            } catch (IOException e) { e.printStackTrace(); }
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            try {
-                JSONObject jsonResponse = new JSONObject(response);
-                JSONArray jsonResponseArr = jsonResponse.getJSONArray("exchangeRate");
-                TableLayout table = MainActivity.this.findViewById(R.id.table_1);
-                String buy;
-                String sale;
-
-                for (int i = 1; i < jsonResponseArr.length(); i++) {
-                    try {
-                        buy = cutTo3AfterPoint(jsonResponseArr.getJSONObject(i).getString("purchaseRate"));
-                        sale = cutTo3AfterPoint(jsonResponseArr.getJSONObject(i).getString("saleRate"));
-
-                        TableRow row = (TableRow) LayoutInflater.from(MainActivity.this).inflate(R.layout.table_1_row_template, null);
-                        ((TextView) row.findViewById(R.id.table_1_currency)).setText(jsonResponseArr.getJSONObject(i).getString("currency"));
-                        ((TextView) row.findViewById(R.id.table_1_buy)).setText(buy);
-                        ((TextView) row.findViewById(R.id.table_1_sale)).setText(sale);
-
-                        int id = View.generateViewId();
-                        row.setId(id);
-                        table.addView(row);
-                        table1RowList.add((TableRow) table.findViewById(id));
-                    } catch (Exception e) { }
-                }
-
-                MainActivity.progressBar1.setVisibility(View.INVISIBLE);
-            } catch (JSONException e) {e.printStackTrace();}
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-            MainActivity.progressBar1.setVisibility(View.VISIBLE);
-        }
-    }
-
-    class GetNBUResponseTask extends AsyncTask<URL, Void, String> {
-        @Override
-        protected String doInBackground(URL... urls) {
-            publishProgress();
-
-            String response = null;
-            try {
-                response = getResponseFromURL(urls[0]);
-            } catch (IOException e) { e.printStackTrace(); }
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            try {
-                boolean isEven = false;
-                JSONArray jsonResponse = new JSONArray(response);
-                TableLayout table = MainActivity.this.findViewById(R.id.table_2);
-
-                for (int i = 0; i < jsonResponse.length(); i++) {
-                    TableRow row = (TableRow) LayoutInflater.from(MainActivity.this).inflate(R.layout.table_2_row_template, null);
-                    double rateVal = jsonResponse.getJSONObject(i).getDouble("rate");
-                    short units = 1;
-
-                    while (rateVal < 1) {
-                        rateVal *= 10;
-                        units *= 10;
-                    }
-
-                    String rate = rateVal + "";
-                    rate = cutTo3AfterPoint(rate);
-                    String cc = units + " " + jsonResponse.getJSONObject(i).getString("cc");
-
-                    ((TextView) row.findViewById(R.id.table_2_currency)).setText(jsonResponse.getJSONObject(i).getString("txt"));
-                    ((TextView) row.findViewById(R.id.table_2_amount)).setText(rate);
-                    ((TextView) row.findViewById(R.id.table_2_units)).setText(cc);
-
-                    if (!isEven) {
-                            row.setBackgroundColor(Color.WHITE);
-                        } else {
-                            row.setBackgroundResource(R.color.greenLight);
-                        }
-
-                    int id = View.generateViewId();
-                    row.setId(id);
-                    table.addView(row);
-                    table2RowList.add((TableRow) table.findViewById(id));
-                    isEven = !isEven;
-                }
-
-                MainActivity.progressBar2.setVisibility(View.INVISIBLE);
-            } catch (Exception e) { e.printStackTrace(); }
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-            MainActivity.progressBar2.setVisibility(View.VISIBLE);
-        }
-    }
-
-
-
-
-
-    public String getResponseFromURL(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        InputStream inputStream = urlConnection.getInputStream();
-        Scanner scanner = new Scanner(inputStream);
-        scanner.useDelimiter("\\A");
-
-        try {
-            if (scanner.hasNext()) {
-                return scanner.next();
-            } else {
-                return null;
-            }
-        } finally {
-            urlConnection.disconnect();
-        }
-    }
-
-    private String cutTo3AfterPoint(String string) {
-        String[] stringArr = string.split("\\p{Punct}");
-        if (stringArr.length > 1){
-            StringBuilder afterPoint = new StringBuilder(stringArr[1]);
-
-            if (afterPoint.length() > 3) {
-                return stringArr[0] + "." + afterPoint.substring(0, 3);
-
-            } else if (afterPoint.length() < 3) {
-                while (afterPoint.length() < 3) {
-                    afterPoint.append("0");
-                }
-                return stringArr[0] + "." + afterPoint.toString();
-
-            } else return string;
-
-        } else return string + ".000";
     }
 
     public boolean checkYear (int year, int month, int day) {
